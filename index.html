@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>نور البيان AI | استوديو صناعة الفيديوهات القرآنية</title>
+<meta name="description" content="استوديو لصناعة فيديوهات قرآنية بصوت كبار القراء وخلفيات متحركة وتصدير بجودة عالية.">
+
+<!-- PWA / Mobile -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#020617">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="نور البيان">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+
+<!-- Fonts + Tailwind -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;700&family=Tajawal:wght@400;500;700&family=Scheherazade+New:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+  html,body{background:#020617;color:#e2e8f0;font-family:'Cairo','Tajawal',system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+  body{padding-bottom:env(safe-area-inset-bottom)}
+  .card{background:rgba(15,23,42,.85);border:1px solid rgba(148,163,184,.14);border-radius:1rem;padding:1rem}
+  .card h3{font-weight:700;color:#fbbf24;font-size:.95rem;margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem}
+  label.lbl{display:block;font-size:.78rem;color:#94a3b8;margin-bottom:.25rem}
+  select,input[type=number],input[type=text]{width:100%;background:#0b1220;border:1px solid #1e293b;color:#e2e8f0;border-radius:.6rem;padding:.5rem .65rem;font-size:.9rem;outline:none}
+  select:focus{border-color:#fbbf24}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;border-radius:.7rem;padding:.55rem .9rem;font-weight:600;font-size:.88rem;background:#0f1a30;border:1px solid #1e293b;transition:.15s;cursor:pointer;color:#e2e8f0}
+  .btn:hover{border-color:#fbbf24}
+  .btn.on{background:#fbbf24;color:#1a1204;border-color:#fbbf24}
+  .btn-primary{background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#1a1204;border:none}
+  .btn-primary:hover{filter:brightness(1.08)}
+  .btn-danger{background:#dc2626;border-color:#dc2626;color:#fff}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:99px;background:#1e293b;outline:none;direction:ltr}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#fbbf24;border:2px solid #0b1220;cursor:pointer}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fbbf24;border:2px solid #0b1220;cursor:pointer}
+  .sw{position:relative;width:44px;height:24px;border-radius:99px;background:#334155;border:none;cursor:pointer;transition:.2s;flex:none}
+  .sw::after{content:"";position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s}
+  .sw[aria-checked=true]{background:#10b981}
+  .sw[aria-checked=true]::after{right:23px}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:.35rem 0}
+  .bg-item{position:relative;border-radius:.7rem;overflow:hidden;border:2px solid transparent;cursor:pointer;aspect-ratio:1/1;background:#000}
+  .bg-item canvas{width:100%;height:100%;display:block}
+  .bg-item span{position:absolute;inset-inline:0;bottom:0;font-size:.62rem;text-align:center;padding:.15rem;background:linear-gradient(transparent,rgba(0,0,0,.85));color:#fff}
+  .bg-item.sel{border-color:#fbbf24;box-shadow:0 0 0 2px rgba(251,191,36,.3)}
+  .swatch{width:28px;height:28px;border-radius:50%;border:2px solid #334155;cursor:pointer}
+  .swatch.sel{border-color:#fbbf24;transform:scale(1.12)}
+  .locked{pointer-events:none;opacity:.45;filter:grayscale(.4)}
+  #toast{position:fixed;inset-inline:0;bottom:1.2rem;margin:auto;width:max-content;max-width:92vw;background:#0f172a;border:1px solid #fbbf24;color:#fde68a;padding:.6rem 1rem;border-radius:.8rem;font-size:.88rem;z-index:50;opacity:0;transform:translateY(10px);transition:.25s;pointer-events:none}
+  #toast.show{opacity:1;transform:none}
+  .rec-dot{width:10px;height:10px;border-radius:50%;background:#ef4444;animation:pulse 1s infinite}
+  @keyframes pulse{50%{opacity:.25}}
+</style>
+</head>
+
+<body class="min-h-screen">
+<header class="sticky top-0 z-30 backdrop-blur bg-slate-950/80 border-b border-slate-800">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <img src="icon.svg" alt="" class="w-10 h-10 rounded-xl">
+      <div>
+        <h1 class="text-lg font-bold leading-tight text-amber-300">نور البيان AI</h1>
+        <p class="text-[11px] text-slate-400">استوديو صناعة الفيديوهات القرآنية</p>
+      </div>
+    </div>
+    <button id="installBtn" class="btn btn-primary hidden">⬇ تثبيت التطبيق</button>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-3 sm:px-4 py-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_430px]">
+
+  <!-- ===== Preview column ===== -->
+  <section class="space-y-3 lg:sticky lg:top-[72px] self-start">
+    <div class="card flex flex-col items-center">
+      <div id="frame" class="relative rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 bg-black">
+        <canvas id="stage" class="block w-full h-full"></canvas>
+        <div id="recBadge" class="hidden absolute top-3 right-3 flex items-center gap-2 bg-black/60 text-white text-xs px-2.5 py-1 rounded-full"><span class="rec-dot"></span><span id="recTime">00:00</span></div>
+        <div id="loadingBadge" class="absolute inset-0 hidden items-center justify-center bg-black/50 text-sm">جارٍ التحميل…</div>
+      </div>
+
+      <!-- Audio controls -->
+      <div class="w-full max-w-[760px] mt-4 space-y-3">
+        <div>
+          <input id="progress" type="range" min="0" max="1000" value="0" aria-label="شريط التقدم">
+          <div class="flex justify-between text-[11px] text-slate-400 mt-1"><span id="verseLbl">الآية 0 / 0</span><span id="timeLbl">00:00</span></div>
+        </div>
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <button id="playBtn" class="btn btn-primary w-28" aria-label="تشغيل">▶ تشغيل</button>
+            <button id="restartBtn" class="btn" title="إعادة من البداية">⟲ إعادة</button>
+            <button id="loopBtn" class="btn" title="تكرار تلقائي">🔁 تكرار</button>
+          </div>
+          <div class="flex items-center gap-2 min-w-[160px] flex-1 max-w-[260px]">
+            <span id="volIcon" class="text-lg">🔊</span>
+            <input id="volume" type="range" min="0" max="100" value="100" aria-label="مستوى الصوت">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Settings column ===== -->
+  <section class="space-y-3">
+    <div id="settings" class="space-y-3">
+
+      <div class="card">
+        <h3>📖 السورة والقارئ</h3>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="col-span-2"><label class="lbl">السورة</label><select id="surahSel"><option>جارٍ التحميل…</option></select></div>
+          <div><label class="lbl">من الآية</label><select id="fromSel"></select></div>
+          <div><label class="lbl">إلى الآية</label><select id="toSel"></select></div>
+          <div class="col-span-2"><label class="lbl">القارئ</label><select id="reciterSel"></select></div>
+        </div>
+        <p id="audioHint" class="text-[11px] text-slate-500 mt-2">الصوت يُحمَّل آية بآية من خوادم EveryAyah وIslamic Network.</p>
+      </div>
+
+      <div class="card">
+        <h3>📐 أبعاد الفيديو</h3>
+        <div class="grid grid-cols-3 gap-2" id="aspectBtns">
+          <button class="btn on" data-aspect="9:16">▯ 9:16<br><span class="text-[10px] opacity-70">ريلز / تيك توك</span></button>
+          <button class="btn" data-aspect="16:9">▭ 16:9<br><span class="text-[10px] opacity-70">يوتيوب</span></button>
+          <button class="btn" data-aspect="1:1">◻ 1:1<br><span class="text-[10px] opacity-70">مربّع</span></button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>🎞 الخلفيات المتحركة</h3>
+        <div id="bgGrid" class="grid grid-cols-4 sm:grid-cols-5 lg:grid-cols-4 gap-2"></div>
+        <div class="mt-3 flex items-center gap-2">
+          <label class="btn flex-1 cursor-pointer">⬆ رفع خلفية (صورة / فيديو)
+            <input id="bgUpload" type="file" accept="image/*,video/*" class="hidden">
+          </label>
+          <button id="bgClear" class="btn hidden">✕</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>🅰 النص والتنسيق</h3>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="lbl">نوع الخط</label>
+            <select id="fontSel">
+              <option value="Amiri">أميري (Amiri)</option>
+              <option value="Scheherazade New">شهرزاد (Scheherazade New)</option>
+              <option value="Cairo">القاهرة (Cairo)</option>
+              <option value="Tajawal">تجوّل (Tajawal)</option>
+              <option value="Noto Naskh Arabic">نسخ (Noto Naskh)</option>
+              <option value="Reem Kufi">ريم كوفي (Reem Kufi)</option>
+            </select></div>
+          <div><label class="lbl">لون الخط</label>
+            <div class="flex items-center gap-2">
+              <input id="colorInp" type="color" value="#ffffff" class="w-10 h-9 rounded bg-transparent border border-slate-700 p-0.5 cursor-pointer">
+              <div id="swatches" class="flex gap-1.5 flex-wrap"></div>
+            </div></div>
+          <div class="col-span-2"><label class="lbl">حجم الخط: <span id="sizeVal">70</span></label><input id="sizeRange" type="range" min="30" max="130" value="70"></div>
+        </div>
+        <div class="mt-2 divide-y divide-slate-800">
+          <div class="row"><span class="text-sm">صندوق شفاف خلف النص</span><button id="swOverlay" class="sw" role="switch" aria-checked="true"></button></div>
+          <div class="row"><span class="text-sm">شفافية الصندوق</span><input id="overlayOp" type="range" min="10" max="90" value="45" class="max-w-[160px]"></div>
+          <div class="row"><span class="text-sm">الآية في سطر واحد (ضبط تلقائي للحجم)</span><button id="swSingle" class="sw" role="switch" aria-checked="false"></button></div>
+          <div class="row"><span class="text-sm">إظهار رقم الآية ﴿١﴾</span><button id="swNum" class="sw" role="switch" aria-checked="true"></button></div>
+          <div class="row"><span class="text-sm">إظهار اسم السورة أعلى الفيديو</span><button id="swName" class="sw" role="switch" aria-checked="true"></button></div>
+        </div>
+        <p class="text-[11px] text-slate-500 mt-2">لا يُعرض اسم القارئ على الفيديو.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🎬 التسجيل والتصدير</h3>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="lbl">الجودة</label>
+          <select id="qualitySel">
+            <option value="720">720p HD</option>
+            <option value="1080" selected>1080p Full HD</option>
+            <option value="2160">4K Ultra HD</option>
+          </select></div>
+        <div><label class="lbl">الصيغة</label>
+          <select id="formatSel"><option value="mp4">MP4</option><option value="webm">WebM</option></select></div>
+      </div>
+      <p id="exportInfo" class="text-[11px] text-slate-500 mt-2"></p>
+      <button id="recBtn" class="btn btn-primary w-full mt-3 py-3 text-base">⏺ تسجيل وتصدير الفيديو</button>
+      <p class="text-[11px] text-amber-300/80 mt-2">أبقِ التبويب ظاهراً أثناء التسجيل. يبدأ التسجيل من أول آية في النطاق وينتهي تلقائياً بنهاية آخر آية.</p>
+      <div id="result" class="hidden mt-3 p-3 rounded-xl bg-emerald-900/30 border border-emerald-700/50 text-sm space-y-2"></div>
+    </div>
+
+    <p class="text-center text-[11px] text-slate-600 pb-6">النص من AlQuran Cloud · الصوتيات من EveryAyah / Islamic Network</p>
+  </section>
+</main>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+/* =========================================================
+   Nour Al-Bayan AI — Quran video studio
+   ========================================================= */
+const $ = id => document.getElementById(id);
+const canvas = $('stage'), ctx = canvas.getContext('2d');
+const toArabicDigits = n => String(n).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+const pad3 = n => String(n).padStart(3, '0');
+const fmtTime = s => { s = Math.max(0, Math.floor(s || 0)); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); };
+
+function toast(msg, ms = 3200) {
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), ms);
+}
+
+/* ---------------- Reciters ---------------- */
+const CDN = 'https://cdn.islamic.network/quran/audio/';
+const EVERY = 'https://everyayah.com/data/';
+const RECITERS = [
+  { id: 'dosari', name: 'ياسر الدوسري',               folder: 'Yasser_Ad-Dussary_128kbps',     cdn: [] },
+  { id: 'afasy',  name: 'مشاري راشد العفاسي',         folder: 'Alafasy_128kbps',               cdn: ['128/ar.alafasy', '64/ar.alafasy'] },
+  { id: 'basit',  name: 'عبد الباسط عبد الصمد (مرتّل)', folder: 'Abdul_Basit_Murattal_192kbps',  cdn: ['192/ar.abdulbasitmurattal', '64/ar.abdulbasitmurattal'] },
+  { id: 'maher',  name: 'ماهر المعيقلي',               folder: 'MaherAlMuaiqly128kbps',         cdn: ['128/ar.mahermuaiqly'] },
+  { id: 'husary', name: 'محمود خليل الحصري',           folder: 'Husary_128kbps',                cdn: ['128/ar.husary'] },
+  { id: 'minshawi', name: 'محمد صدّيق المنشاوي (مرتّل)', folder: 'Minshawy_Murattal_128kbps',     cdn: ['128/ar.minshawi'] },
+  { id: 'shuraim', name: 'سعود الشريم',                folder: 'Saood_ash-Shuraym_128kbps',     cdn: ['64/ar.saoodshuraym', '128/ar.saoodshuraym'] }
+];
+function audioUrls(reciter, surah, ayah) {
+  const list = reciter.cdn.map(p => `${CDN}${p}/${ayah.number}.mp3`);
+  list.push(`${EVERY}${reciter.folder}/${pad3(surah)}${pad3(ayah.n)}.mp3`);
+  list.push(`https://www.everyayah.com/data/${reciter.folder}/${pad3(surah)}${pad3(ayah.n)}.mp3`);
+  return list;
+}
+
+/* ---------------- State ---------------- */
+const S = {
+  surahs: [], ayahs: [], range: [], surah: 1, from: 1, to: 7, reciter: 'dosari',
+  aspect: '9:16', bg: 0, custom: null,
+  font: 'Amiri', color: '#ffffff', fontSize: 70,
+  overlay: true, overlayOp: .45, single: false, showNum: true, showName: true,
+  playing: false, loop: false, idx: 0, loadedIdx: -1, verseStart: 0,
+  quality: '1080', format: 'mp4', recording: false
+};
+const QUALITY = {
+  '720':  { short: 720,  bps: 8e6,  fps: 60, label: '720p' },
+  '1080': { short: 1080, bps: 16e6, fps: 60, label: '1080p' },
+  '2160': { short: 2160, bps: 45e6, fps: 30, label: '4K' }
+};
+/* Performance profile: phones render lighter scenes at 30 fps with lower bitrates */
+const IS_MOBILE = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && Math.min(screen.width, screen.height) < 900);
+const LITE = IS_MOBILE;
+if (IS_MOBILE) {
+  QUALITY['720'].bps = 5e6;  QUALITY['720'].fps = 30;
+  QUALITY['1080'].bps = 9e6; QUALITY['1080'].fps = 30;
+  QUALITY['2160'].bps = 20e6; QUALITY['2160'].fps = 24;
+  S.quality = '720';
+}
+const targetFps = () => (S.recording ? QUALITY[S.quality].fps : (IS_MOBILE ? 30 : 60));
+
+/* ---------------- Quran data ---------------- */
+const API = 'https://api.alquran.cloud/v1';
+async function fetchJSON(url) {
+  const r = await fetch(url); if (!r.ok) throw new Error(r.status);
+  const j = await r.json(); return j.data;
+}
+async function loadSurahs() {
+  try {
+    S.surahs = await fetchJSON(`${API}/surah`);
+    const sel = $('surahSel'); sel.innerHTML = '';
+    S.surahs.forEach(s => sel.add(new Option(`${toArabicDigits(s.number)}. ${s.name} — ${s.englishName}`, s.number)));
+    sel.value = S.surah;
+    await loadSurah(S.surah);
+  } catch (e) {
+    toast('تعذّر تحميل قائمة السور. تحقّق من الاتصال بالإنترنت.', 6000);
+  }
+}
+async function loadSurah(n) {
+  S.surah = n; $('loadingBadge').style.display = 'flex';
+  try {
+    const d = await fetchJSON(`${API}/surah/${n}/quran-uthmani`);
+    S.ayahs = d.ayahs.map(a => {
+      let text = a.text.trim();
+      // Remove the Basmala prefix that the API attaches to verse 1 (except Al-Fatiha and At-Tawba)
+      if (a.numberInSurah === 1 && n !== 1 && n !== 9) text = text.split(/\s+/).slice(4).join(' ');
+      return { number: a.number, n: a.numberInSurah, text };
+    });
+    const total = S.ayahs.length;
+    ['fromSel', 'toSel'].forEach(id => {
+      const s = $(id); s.innerHTML = '';
+      for (let i = 1; i <= total; i++) s.add(new Option(toArabicDigits(i), i));
+    });
+    S.from = 1; S.to = Math.min(total, 10);
+    $('fromSel').value = S.from; $('toSel').value = S.to;
+    applyRange();
+  } catch (e) {
+    toast('تعذّر تحميل نص السورة.', 5000);
+  } finally { $('loadingBadge').style.display = 'none'; }
+}
+function applyRange() {
+  hardStop();
+  if (S.from > S.to) { S.to = S.from; $('toSel').value = S.to; }
+  S.range = S.ayahs.filter(a => a.n >= S.from && a.n <= S.to);
+  S.idx = 0; S.loadedIdx = -1; S.verseStart = performance.now();
+  updateUI();
+}
+const curReciter = () => RECITERS.find(r => r.id === S.reciter);
+const curSurahInfo = () => S.surahs.find(s => s.number === S.surah);
+
+/* ---------------- Audio engine ---------------- */
+const audio = new Audio();
+audio.crossOrigin = 'anonymous';   // required so the stream can be recorded
+audio.preload = 'auto';
+audio.playsInline = true;
+let actx = null, gainNode = null, recDest = null, urlList = [], tryIdx = 0, pendingSeek = null;
+const preloader = new Audio(); preloader.crossOrigin = 'anonymous'; preloader.preload = 'auto';
+
+function ensureAudio() {
+  if (!actx) {
+    actx = new (window.AudioContext || window.webkitAudioContext)();
+    const src = actx.createMediaElementSource(audio);
+    gainNode = actx.createGain();
+    recDest = actx.createMediaStreamDestination();
+    src.connect(recDest);               // recording tap (independent of volume slider)
+    src.connect(gainNode).connect(actx.destination);
+    gainNode.gain.value = $('volume').value / 100;
+  }
+  if (actx.state === 'suspended') return actx.resume();
+  return Promise.resolve();
+}
+function loadVerse(i) {
+  const a = S.range[i]; if (!a) return;
+  S.idx = i; S.loadedIdx = i; S.verseStart = performance.now();
+  urlList = audioUrls(curReciter(), S.surah, a); tryIdx = 0;
+  audio.src = urlList[0];
+  audio.load();
+  const nx = S.range[i + 1];
+  if (nx) { preloader.src = audioUrls(curReciter(), S.surah, nx)[0]; preloader.load(); }
+  updateUI();
+}
+audio.addEventListener('error', () => {
+  if (!audio.getAttribute('src')) return;
+  if (++tryIdx < urlList.length) {
+    audio.src = urlList[tryIdx]; audio.load();
+    if (S.playing) audio.play().catch(() => {});
+  } else {
+    toast('تعذّر تحميل الصوت لهذه الآية. جرّب قارئاً آخر.', 5000);
+    if (S.recording) cancelRecording('فشل تحميل الصوت'); else { S.playing = false; updateUI(); }
+  }
+});
+audio.addEventListener('loadedmetadata', () => {
+  if (pendingSeek != null && isFinite(audio.duration)) { audio.currentTime = pendingSeek * audio.duration; pendingSeek = null; }
+});
+audio.addEventListener('ended', () => {
+  if (S.idx < S.range.length - 1) {
+    loadVerse(S.idx + 1);
+    audio.play().catch(() => {});
+  } else if (S.recording) {
+    S.playing = false; updateUI();
+    setTimeout(stopRecording, 900);
+  } else if (S.loop) {
+    loadVerse(0); audio.play().catch(() => {});
+  } else {
+    S.playing = false; updateUI();
+  }
+});
+async function play() {
+  if (!S.range.length) return toast('اختر سورة أولاً');
+  await ensureAudio();
+  if (S.loadedIdx !== S.idx) loadVerse(S.idx);
+  S.playing = true;
+  try { await audio.play(); } catch (e) { S.playing = false; toast('تعذّر التشغيل — اضغط مرة أخرى'); }
+  updateUI();
+}
+function pause() { audio.pause(); S.playing = false; updateUI(); }
+function hardStop() { audio.pause(); audio.removeAttribute('src'); S.playing = false; S.loadedIdx = -1; pendingSeek = null; }
+function restart() { loadVerse(0); if (S.playing) { audio.play().catch(() => {}); } }
+function seekFraction(f) {
+  const n = S.range.length; if (!n) return;
+  const t = f * n, i = Math.min(n - 1, Math.floor(t));
+  pendingSeek = Math.min(.999, t - i);
+  loadVerse(i);
+  if (S.playing) audio.play().catch(() => {});
+}
+
+/* ---------------- Canvas sizing ---------------- */
+function getDims(aspect, short) {
+  const e = v => Math.round(v / 2) * 2;
+  if (aspect === '9:16') return [e(short), e(short * 16 / 9)];
+  if (aspect === '16:9') return [e(short * 16 / 9), e(short)];
+  return [e(short), e(short)];
+}
+const previewShort = () => (IS_MOBILE ? 450 : 720);
+function setCanvasSize(w, h) { if (canvas.width !== w) canvas.width = w; if (canvas.height !== h) canvas.height = h; }
+function applyAspect() {
+  const f = $('frame'); f.style.cssText = '';
+  if (S.aspect === '9:16') { f.style.aspectRatio = '9/16'; f.style.height = 'min(70vh,640px)'; }
+  else if (S.aspect === '16:9') { f.style.aspectRatio = '16/9'; f.style.width = '100%'; f.style.maxWidth = '760px'; }
+  else { f.style.aspectRatio = '1/1'; f.style.width = 'min(100%,520px)'; }
+  if (!S.recording) { const [w, h] = getDims(S.aspect, previewShort()); setCanvasSize(w, h); }
+  document.querySelectorAll('#aspectBtns .btn').forEach(b => b.classList.toggle('on', b.dataset.aspect === S.aspect));
+  updateExportInfo();
+}
+
+/* ---------------- Background scenes ---------------- */
+const R = (() => { let s = 20260; return () => (s = (s * 16807) % 2147483647) / 2147483647; })();
+const hash = n => { const x = Math.sin(n * 127.1) * 43758.5453; return x - Math.floor(x); };
+const U = (w, h) => Math.min(w, h) / 720;
+function grad(c, stops, x0, y0, x1, y1) { const g = c.createLinearGradient(x0, y0, x1, y1); stops.forEach(([o, col]) => g.addColorStop(o, col)); return g; }
+function glow(c, x, y, r, rgb, a) {
+  const g = c.createRadialGradient(x, y, 0, x, y, r);
+  g.addColorStop(0, `rgba(${rgb},${a})`); g.addColorStop(1, `rgba(${rgb},0)`);
+  c.fillStyle = g; c.fillRect(x - r, y - r, r * 2, r * 2);
+}
+function ridge(c, w, h, baseY, fn, color) {
+  c.beginPath(); c.moveTo(0, h);
+  const step = Math.max(4, w / 110);
+  for (let x = 0; x <= w + step; x += step) c.lineTo(x, baseY + fn(x / w));
+  c.lineTo(w, h); c.closePath(); c.fillStyle = color; c.fill();
+}
+const STARS = Array.from({ length: 280 }, () => ({ x: R(), y: R(), r: R() * 1.5 + .35, p: R() * 6.28, s: R() * 2 + .6 }));
+function drawStars(c, w, h, t, maxY = 1, k = 1) {
+  const u = U(w, h); c.fillStyle = '#fff';
+  const lim = LITE ? 150 : STARS.length;
+  for (let i = 0; i < lim; i++) {
+    const s = STARS[i];
+    if (s.y > maxY) continue;
+    c.globalAlpha = Math.max(0, Math.min(1, (.55 + .45 * Math.sin(t * s.s + s.p)) * k));
+    c.beginPath(); c.arc(s.x * w, s.y * h, s.r * u, 0, 6.283); c.fill();
+  }
+  c.globalAlpha = 1;
+}
+function mosque(c, w, h, color) {
+  const u = U(w, h), by = h * .92; c.fillStyle = color;
+  c.fillRect(0, by, w, h - by);
+  const dome = (cx, r) => { c.beginPath(); c.arc(cx, by, r, Math.PI, 0); c.fill(); c.fillRect(cx - 2 * u, by - r - 14 * u, 4 * u, 14 * u); };
+  const minaret = (cx, mh) => { c.fillRect(cx - 7 * u, by - mh, 14 * u, mh); c.beginPath(); c.moveTo(cx - 10 * u, by - mh); c.lineTo(cx, by - mh - 38 * u); c.lineTo(cx + 10 * u, by - mh); c.fill(); c.fillRect(cx - 11 * u, by - mh * .7, 22 * u, 5 * u); };
+  dome(w * .5, 80 * u); dome(w * .5 - 105 * u, 38 * u); dome(w * .5 + 105 * u, 38 * u);
+  c.fillRect(w * .5 - 135 * u, by - 40 * u, 270 * u, 40 * u);
+  minaret(w * .5 - 190 * u, 190 * u); minaret(w * .5 + 190 * u, 190 * u);
+}
+
+/* 1 — Night sky & stars */
+function sceneNight(c, w, h, t) {
+  const u = U(w, h);
+  c.fillStyle = grad(c, [[0, '#020617'], [.55, '#0b1a3b'], [1, '#1e3a6e']], 0, 0, 0, h); c.fillRect(0, 0, w, h);
+  drawStars(c, w, h, t);
+  const mx = w * .74, my = h * .17;
+  glow(c, mx, my, 190 * u, '253,230,160', .35);
+  c.fillStyle = '#fef3c7'; c.beginPath(); c.arc(mx, my, 46 * u, 0, 6.283); c.fill();
+  c.fillStyle = 'rgba(180,160,110,.35)';
+  [[-14, -8, 10], [12, 10, 13], [-6, 20, 7]].forEach(([dx, dy, r]) => { c.beginPath(); c.arc(mx + dx * u, my + dy * u, r * u, 0, 6.283); c.fill(); });
+  const ph = (t % 9) / 1.1;
+  if (ph < 1) {
+    const sx = w * (.1 + ph * .45), sy = h * (.05 + ph * .25);
+    const g = c.createLinearGradient(sx, sy, sx - 120 * u, sy - 60 * u); g.addColorStop(0, 'rgba(255,255,255,.95)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+    c.strokeStyle = g; c.lineWidth = 2.5 * u; c.beginPath(); c.moveTo(sx, sy); c.lineTo(sx - 120 * u, sy - 60 * u); c.stroke();
+  }
+  mosque(c, w, h, '#050b1a');
+}
+
+/* 2 — Golden desert dunes */
+const SAND_DUST = Array.from({ length: 70 }, () => ({ x: R(), y: .45 + R() * .5, s: .3 + R(), r: .6 + R() * 1.4 }));
+function sceneDesert(c, w, h, t) {
+  const u = U(w, h);
+  c.fillStyle = grad(c, [[0, '#f59e0b'], [.35, '#fcd34d'], [.7, '#fde7b0'], [1, '#fff3d6']], 0, 0, 0, h * .7); c.fillRect(0, 0, w, h);
+  glow(c, w * .7, h * .27, 330 * u, '255,244,200', .9);
+  c.fillStyle = '#fffbe8'; c.beginPath(); c.arc(w * .7, h * .27, 50 * u, 0, 6.283); c.fill();
+  const cols = ['#e8b36a', '#d99a50', '#c0793a', '#8f5424'];
+  cols.forEach((col, i) => {
+    const sp = .05 + i * .03, amp = (30 + i * 18) * u;
+    ridge(c, w, h, h * (.5 + i * .12), x => Math.sin(x * (3 + i) + t * sp + i * 2) * amp + Math.sin(x * (7 + i * 2) - t * sp * 1.4) * amp * .35, col);
+  });
+  c.fillStyle = 'rgba(255,230,170,.55)';
+  for (const p of SAND_DUST) { const x = ((p.x + t * .03 * p.s) % 1) * w; c.fillRect(x, p.y * h + Math.sin(t * p.s + p.x * 9) * 6 * u, p.r * u * 1.8, p.r * u); }
+}
+
+/* 3 — Peaceful rainforest */
+const FLIES = Array.from({ length: 36 }, () => ({ x: R(), y: .35 + R() * .6, p: R() * 6.28, s: .2 + R() * .5 }));
+function sceneForest(c, w, h, t) {
+  const u = U(w, h);
+  c.fillStyle = grad(c, [[0, '#d9f99d'], [.25, '#4d7c0f'], [.6, '#14532d'], [1, '#022c22']], 0, 0, 0, h); c.fillRect(0, 0, w, h);
+  c.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 5; i++) {
+    const x = w * (.1 + i * .22) + Math.sin(t * .15 + i) * 40 * u, a = .05 + .04 * Math.sin(t * .4 + i * 1.7);
+    const g = c.createLinearGradient(x, 0, x + 120 * u, h * .8); g.addColorStop(0, `rgba(255,250,200,${a * 2})`); g.addColorStop(1, 'rgba(255,250,200,0)');
+    c.fillStyle = g; c.beginPath(); c.moveTo(x, 0); c.lineTo(x + 70 * u, 0); c.lineTo(x + 320 * u, h * .85); c.lineTo(x + 130 * u, h * .85); c.fill();
+  }
+  c.globalCompositeOperation = 'source-over';
+  const layers = [['#1f6b3a', .5, 70, 3], ['#14532d', .62, 85, 4], ['#0b3b24', .76, 100, 5], ['#052e1a', .9, 60, 6]];
+  layers.forEach(([col, base, amp, f], i) => {
+    const sw = Math.sin(t * .3 + i) * 6 * u;
+    ridge(c, w, h, h * base, x => -Math.abs(Math.sin(x * f * 3.1 + i * 2 + sw * .02)) * amp * u * .9 - Math.sin(x * f * 7 + t * .2) * 8 * u, col);
+  });
+  c.strokeStyle = 'rgba(2,20,12,.85)'; c.lineWidth = 12 * u;
+  for (let i = 0; i < 7; i++) { const x = w * (.05 + i * .16) + hash(i) * 30 * u; c.beginPath(); c.moveTo(x, h); c.quadraticCurveTo(x + Math.sin(t * .3 + i) * 8 * u, h * .6, x + 10 * u, h * .35); c.stroke(); }
+  const mg = c.createLinearGradient(0, h * .55, 0, h); mg.addColorStop(0, 'rgba(220,255,230,0)'); mg.addColorStop(.5, `rgba(220,255,230,${.12 + .05 * Math.sin(t * .3)})`); mg.addColorStop(1, 'rgba(220,255,230,0)');
+  c.fillStyle = mg; c.fillRect(0, h * .55, w, h * .45);
+  for (const f of FLIES) {
+    const x = (f.x + Math.sin(t * f.s + f.p) * .05) * w, y = (f.y + Math.cos(t * f.s * 1.3 + f.p) * .03) * h;
+    glow(c, x, y, 14 * u, '220,255,120', .5 + .5 * Math.sin(t * 2 + f.p));
+  }
+}
+
+/* 4 — Dawn ocean waves */
+function sceneOcean(c, w, h, t) {
+  const u = U(w, h), hor = h * .55;
+  c.fillStyle = grad(c, [[0, '#1e1b4b'], [.3, '#7e22ce'], [.55, '#db2777'], [.8, '#fb923c'], [1, '#fde68a']], 0, 0, 0, hor); c.fillRect(0, 0, w, hor + 1);
+  const sy = hor - (Math.sin(t * .08) * .5 + .5) * h * .05 + 4 * u;
+  c.save(); c.beginPath(); c.rect(0, 0, w, hor); c.clip();
+  glow(c, w * .5, sy, 340 * u, '255,190,110', .85);
+  c.fillStyle = '#fff1c1'; c.beginPath(); c.arc(w * .5, sy, 52 * u, 0, 6.283); c.fill(); c.restore();
+  c.fillStyle = grad(c, [[0, '#f59e0b'], [.12, '#be4a5e'], [.4, '#164e63'], [1, '#042f45']], 0, hor, 0, h); c.fillRect(0, hor, w, h - hor);
+  for (let k = 0; k < 14; k++) {
+    const p = (k + 1) / 14, y = hor + (h - hor) * p * p, amp = (2 + 16 * p) * u;
+    c.beginPath(); c.moveTo(0, h);
+    for (let x = 0; x <= w + 8; x += 8) c.lineTo(x, y + Math.sin(x / (60 * u * (.4 + p)) + t * (.8 + p) + k) * amp);
+    c.lineTo(w, h); c.closePath();
+    c.fillStyle = `rgba(4,40,60,${.12 + .05 * (k % 2)})`; c.fill();
+    c.strokeStyle = `rgba(255,220,170,${.22 * (1 - p) + .05})`; c.lineWidth = 1.4 * u; c.stroke();
+  }
+  for (let i = 0; i < 46; i++) {
+    const p = hash(i), y = hor + (h - hor) * (p * p) * .9 + 6 * u, wd = (20 + 90 * p) * u * (.5 + .5 * Math.sin(t * 2 + i));
+    c.fillStyle = `rgba(255,225,160,${.5 * (1 - p)})`; c.fillRect(w * .5 + Math.sin(t * .6 + i * 3) * 60 * u * (.3 + p) - wd / 2, y, wd, 2 * u);
+  }
+}
+
+/* 5 — Mountain peaks with clouds */
+const MTN = [0, 1, 2].map(l => Array.from({ length: 36 }, (_, i) => { const a = hash(i * 3.7 + l * 11) ; return a * (l === 0 ? 1 : .8); }));
+const CLOUDS = Array.from({ length: 9 }, () => ({ x: R(), y: .08 + R() * .5, s: .4 + R() * .9, v: .004 + R() * .01 }));
+function drawCloud(c, x, y, s, u, a) {
+  c.fillStyle = `rgba(255,255,255,${a})`;
+  [[0, 0, 40], [38, -12, 46], [82, 0, 38], [42, 14, 42], [-30, 12, 30], [108, 12, 28]].forEach(([dx, dy, r]) => { c.beginPath(); c.arc(x + dx * s * u, y + dy * s * u, r * s * u, 0, 6.283); c.fill(); });
+}
+function sceneMountain(c, w, h, t) {
+  const u = U(w, h);
+  c.fillStyle = grad(c, [[0, '#0369a1'], [.5, '#38bdf8'], [1, '#e0f2fe']], 0, 0, 0, h); c.fillRect(0, 0, w, h);
+  glow(c, w * .2, h * .16, 260 * u, '255,255,230', .7);
+  const cols = [['#94a3b8', .42, 230], ['#64748b', .55, 200], ['#334155', .7, 170]];
+  cols.forEach(([col, base, amp], l) => {
+    const pts = MTN[l], top = h * base - amp * u;
+    c.beginPath(); c.moveTo(0, h);
+    pts.forEach((v, i) => c.lineTo(i / (pts.length - 1) * w, h * base - v * amp * u));
+    c.lineTo(w, h); c.closePath();
+    c.fillStyle = grad(c, [[0, '#f8fafc'], [.22, '#f1f5f9'], [.3, col], [1, '#0f172a']], 0, top, 0, h * base + 60 * u);
+    c.fill();
+  });
+  for (const cl of CLOUDS) {
+    const x = (((cl.x + t * cl.v) % 1.4) - .2) * w;
+    drawCloud(c, x, cl.y * h, cl.s, u, .75);
+  }
+  c.fillStyle = 'rgba(255,255,255,.18)'; c.fillRect(0, h * .78, w, h * .22);
+}
+
+/* 6 — Aurora borealis */
+function sceneAurora(c, w, h, t) {
+  const u = U(w, h);
+  c.fillStyle = grad(c, [[0, '#010514'], [.6, '#071a2f'], [1, '#0b2a3a']], 0, 0, 0, h); c.fillRect(0, 0, w, h);
+  drawStars(c, w, h, t, .8);
+  c.globalCompositeOperation = 'lighter';
+  const ribbons = [['52,211,153', .32], ['45,212,191', .38], ['129,140,248', .44], ['167,139,250', .5]];
+  const step = Math.max(3, (LITE ? 12 : 6) * u);
+  ribbons.forEach(([rgb, yb], i) => {
+    const len = (230 + i * 40) * u;
+    const g = c.createLinearGradient(0, -len, 0, 0);
+    g.addColorStop(0, `rgba(${rgb},0)`); g.addColorStop(.7, `rgba(${rgb},.28)`); g.addColorStop(1, `rgba(${rgb},.55)`);
+    c.fillStyle = g;
+    for (let x = 0; x < w; x += step) {
+      const y = h * yb + Math.sin(x * .004 / u + t * .35 + i * 1.3) * h * .07 + Math.sin(x * .011 / u - t * .27 + i) * h * .03;
+      const k = .65 + .35 * Math.sin(x * .02 / u + t * .8 + i * 2);
+      c.save(); c.translate(x, y); c.scale(1, k); c.fillRect(0, -len, step + 1, len); c.restore();
+    }
+  });
+  c.globalCompositeOperation = 'source-over';
+  ridge(c, w, h, h * .9, x => -Math.abs(Math.sin(x * 9)) * 40 * u - Math.sin(x * 3) * 20 * u, '#02060e');
+}
+
+/* 7 — Starry nebula */
+function sceneNebula(c, w, h, t) {
+  const u = U(w, h);
+  c.fillStyle = '#05010f'; c.fillRect(0, 0, w, h);
+  c.globalCompositeOperation = 'lighter';
+  const blobs = [['168,85,247', .3, .3, 380], ['59,130,246', .7, .4, 420], ['236,72,153', .5, .7, 360], ['20,184,166', .2, .75, 320], ['99,102,241', .8, .85, 340], ['244,114,182', .55, .15, 300]];
+  blobs.forEach(([rgb, x, y, r], i) => {
+    const px = (x + Math.sin(t * .09 + i * 1.9) * .1) * w, py = (y + Math.cos(t * .07 + i * 2.3) * .08) * h;
+    glow(c, px, py, r * u * (1 + .08 * Math.sin(t * .3 + i)), rgb, .42);
+  });
+  c.globalCompositeOperation = 'source-over';
+  drawStars(c, w, h, t * 1.4);
+}
+
+/* 8 — Gentle rain */
+const DROPS = Array.from({ length: 260 }, () => ({ x: R(), y: R(), v: .9 + R() * .9, l: 14 + R() * 26, a: .15 + R() * .4 }));
+function sceneRain(c, w, h, t) {
+  const u = U(w, h);
+  c.fillStyle = grad(c, [[0, '#0b1220'], [.5, '#1e293b'], [1, '#334155']], 0, 0, 0, h); c.fillRect(0, 0, w, h);
+  const mg = c.createLinearGradient(0, 0, 0, h); mg.addColorStop(0, 'rgba(148,163,184,.0)'); mg.addColorStop(.6, `rgba(148,163,184,${.1 + .04 * Math.sin(t * .4)})`); mg.addColorStop(1, 'rgba(148,163,184,.0)');
+  c.fillStyle = mg; c.fillRect(0, 0, w, h);
+  c.lineWidth = 1.4 * u; c.lineCap = 'round';
+  const nD = LITE ? 130 : DROPS.length;
+  for (let di = 0; di < nD; di++) {
+    const d = DROPS[di];
+    const y =((d.y + t * .55 * d.v) % 1.15 - .08) * h, x = (d.x + (y / h) * .08) * w;
+    c.strokeStyle = `rgba(200,220,255,${d.a})`; c.beginPath(); c.moveTo(x, y); c.lineTo(x - d.l * .18 * u, y - d.l * u); c.stroke();
+  }
+  for (let i = 0; i < 16; i++) {
+    const life = (t * .6 + i / 16) % 1, cyc = Math.floor(t * .6 + i / 16);
+    const x = hash(cyc * 31 + i) * w, y = h * (.78 + hash(cyc * 7 + i * 3) * .18);
+    c.strokeStyle = `rgba(200,225,255,${.55 * (1 - life)})`; c.lineWidth = 1.4 * u;
+    c.beginPath(); c.ellipse(x, y, life * 46 * u, life * 12 * u, 0, 0, 6.283); c.stroke();
+  }
+}
+
+/* 9 — Sunset horizon */
+const BIRDS = Array.from({ length: 6 }, (_, i) => ({ y: .15 + R() * .25, off: R(), sp: .015 + R() * .01, sz: .7 + R() * .6 }));
+function sceneSunset(c, w, h, t) {
+  const u = U(w, h), hor = h * .62;
+  c.fillStyle = grad(c, [[0, '#1e1b4b'], [.25, '#6d28d9'], [.5, '#db2777'], [.78, '#f97316'], [1, '#fde047']], 0, 0, 0, hor); c.fillRect(0, 0, w, hor + 1);
+  const sy = hor - 18 * u + Math.sin(t * .15) * 6 * u;
+  c.save(); c.beginPath(); c.rect(0, 0, w, hor); c.clip();
+  glow(c, w * .5, sy, 380 * u, '255,170,80', .9);
+  c.fillStyle = '#ffe9a8'; c.beginPath(); c.arc(w * .5, sy, 70 * u, 0, 6.283); c.fill(); c.restore();
+  for (let i = 0; i < 5; i++) {
+    const x = (((hash(i) + t * (.004 + i * .002)) % 1.5) - .25) * w, y = h * (.2 + i * .07);
+    c.fillStyle = `rgba(${i % 2 ? '255,150,120' : '255,190,110'},.35)`;
+    c.beginPath(); c.ellipse(x, y, (160 + i * 25) * u, (9 + i * 2) * u, 0, 0, 6.283); c.fill();
+  }
+  c.fillStyle = grad(c, [[0, '#f59e0b'], [.08, '#a8325a'], [.4, '#3b1d63'], [1, '#150a2e']], 0, hor, 0, h); c.fillRect(0, hor, w, h - hor);
+  for (let i = 0; i < 40; i++) {
+    const p = hash(i + 3), y = hor + 4 * u + (h - hor) * p * p, wd = (30 + 110 * (1 - p)) * u * (.6 + .4 * Math.sin(t * 2.2 + i));
+    c.fillStyle = `rgba(255,200,120,${.55 * (1 - p)})`; c.fillRect(w * .5 - wd / 2 + Math.sin(t + i) * 5 * u, y, wd, 2.2 * u);
+  }
+  c.strokeStyle = 'rgba(20,10,40,.85)'; c.lineWidth = 2 * u; c.lineCap = 'round';
+  for (const b of BIRDS) {
+    const x = (((b.off + t * b.sp) % 1.2) - .1) * w, y = h * b.y + Math.sin(t * .8 + b.off * 9) * 10 * u, f = Math.sin(t * 7 + b.off * 20) * 7 * u * b.sz, s = 13 * u * b.sz;
+    c.beginPath(); c.moveTo(x - s, y - f); c.quadraticCurveTo(x - s * .4, y - s * .4, x, y); c.quadraticCurveTo(x + s * .4, y - s * .4, x + s, y - f); c.stroke();
+  }
+}
+
+/* 10 — Flowing sand */
+const SAND = Array.from({ length: 800 }, () => ({ x: R(), y: R(), s: .4 + R() * .9, a: .25 + R() * .6 }));
+function sceneSand(c, w, h, t, dt) {
+  const u = U(w, h);
+  c.fillStyle = grad(c, [[0, '#7c2d12'], [.45, '#c2410c'], [1, '#f59e0b']], 0, 0, w, h); c.fillRect(0, 0, w, h);
+  for (let i = 0; i < 4; i++) ridge(c, w, h, h * (.35 + i * .17), x => Math.sin(x * (2 + i) + t * .05 * (i + 1) + i) * (40 + i * 20) * u, `rgba(255,${190 - i * 25},${90 - i * 12},.16)`);
+  c.lineWidth = 1.5 * u; c.lineCap = 'round';
+  const nS = LITE ? 380 : SAND.length;
+  for (let si = 0; si < nS; si++) {
+    const p = SAND[si];
+    const ang = Math.sin(p.x * 6 + t * .35) * .7 + Math.cos(p.y * 5 - t * .25) * .6;
+    const vx = Math.cos(ang) * .16 * p.s + .05, vy = Math.sin(ang) * .06 * p.s;
+    p.x += vx * dt; p.y += vy * dt;
+    if (p.x > 1.02) { p.x = -.02; p.y = R(); } if (p.y < -.02) p.y = 1.02; if (p.y > 1.02) p.y = -.02;
+    c.strokeStyle = `rgba(255,236,190,${p.a})`;
+    c.beginPath(); c.moveTo(p.x * w, p.y * h); c.lineTo((p.x - vx * .7) * w, (p.y - vy * .7) * h); c.stroke();
+  }
+}
+
+const SCENES = [
+  { name: 'ليل النجوم', fn: sceneNight, t: 3 },
+  { name: 'كثبان الصحراء', fn: sceneDesert, t: 2 },
+  { name: 'الغابة المطيرة', fn: sceneForest, t: 2 },
+  { name: 'أمواج الفجر', fn: sceneOcean, t: 2 },
+  { name: 'قمم الجبال', fn: sceneMountain, t: 2 },
+  { name: 'الشفق القطبي', fn: sceneAurora, t: 4 },
+  { name: 'السديم النجمي', fn: sceneNebula, t: 3 },
+  { name: 'المطر الهادئ', fn: sceneRain, t: 2 },
+  { name: 'أفق الغروب', fn: sceneSunset, t: 2 },
+  { name: 'الرمال المتدفقة', fn: sceneSand, t: 2 }
+];
+
+function coverDraw(c, el, w, h, iw, ih) {
+  if (!iw || !ih) return;
+  const s = Math.max(w / iw, h / ih), dw = iw * s, dh = ih * s;
+  c.drawImage(el, (w - dw) / 2, (h - dh) / 2, dw, dh);
+}
+function drawBackground(c, w, h, t, dt) {
+  if (S.custom) {
+    c.fillStyle = '#000'; c.fillRect(0, 0, w, h);
+    const el = S.custom.el;
+    if (S.custom.type === 'video') coverDraw(c, el, w, h, el.videoWidth, el.videoHeight);
+    else coverDraw(c, el, w, h, el.naturalWidth, el.naturalHeight);
+    c.fillStyle = 'rgba(0,0,0,.18)'; c.fillRect(0, 0, w, h);
+  } else SCENES[S.bg].fn(c, w, h, t, dt);
+}
+
+/* ---------------- Text rendering ---------------- */
+function wrapLines(c, text, maxW) {
+  const words = text.split(/\s+/), lines = []; let line = '';
+  for (const wd of words) {
+    const test = line ? line + ' ' + wd : wd;
+    if (c.measureText(test).width > maxW && line) { lines.push(line); line = wd; } else line = test;
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+function rrect(c, x, y, w, h, r) {
+  c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
+}
+let layoutCache = { key: '', size: 0, lines: [] };
+function layoutText(c, text, w, h) {
+  const short = Math.min(w, h), key = [text, w, h, S.font, S.fontSize, S.single].join('|');
+  if (layoutCache.key === key) return layoutCache;
+  const maxW = w * (S.aspect === '16:9' ? .8 : .82), maxH = h * (S.aspect === '16:9' ? .62 : .56), lh = 1.85;
+  let size = short * S.fontSize / 1000, lines;
+  const setF = () => { c.font = `700 ${size}px "${S.font}", "Amiri", serif`; };
+  if (S.single) {
+    const minS = short * .02; setF();
+    while (c.measureText(text).width > maxW && size > minS) { size *= .96; setF(); }
+    lines = wrapLines(c, text, maxW);
+  } else {
+    setF(); lines = wrapLines(c, text, maxW);
+    while (lines.length * size * lh > maxH && size > short * .025) { size *= .94; setF(); lines = wrapLines(c, text, maxW); }
+  }
+  layoutCache = { key, size, lines, lh };
+  return layoutCache;
+}
+/* The verse (box + text + surah name) is rendered once into an offscreen layer and only blitted each frame. */
+let verseLayer = null, verseKey = '';
+function drawVerse(c, w, h) {
+  const a = S.range[S.idx]; if (!a) return;
+  let fontReady = true; try { fontReady = document.fonts.check(`700 20px "${S.font}"`); } catch (_) {}
+  const key = [S.surah, a.n, w, h, S.font, S.fontSize, S.single, S.overlay, S.overlayOp, S.showNum, S.showName, S.color, fontReady].join('|');
+  if (!verseLayer) verseLayer = document.createElement('canvas');
+  if (key !== verseKey || verseLayer.width !== w || verseLayer.height !== h) {
+    verseLayer.width = w; verseLayer.height = h; layoutCache.key = '';
+    renderVerseLayer(verseLayer.getContext('2d'), w, h); verseKey = key;
+  }
+  const fade = Math.min(1, (performance.now() - S.verseStart) / 450);
+  c.globalAlpha = fade; c.drawImage(verseLayer, 0, (1 - fade) * 14); c.globalAlpha = 1;
+}
+function renderVerseLayer(c, w, h) {
+  const a = S.range[S.idx]; if (!a) return;
+  const short = Math.min(w, h);
+  const text = a.text + (S.showNum ? ` \uFD3F${toArabicDigits(a.n)}\uFD3E` : '');
+  const L = layoutText(c, text, w, h);
+  const fade = 1;
+  c.save(); c.direction = 'rtl'; c.textAlign = 'center'; c.textBaseline = 'middle';
+  c.font = `700 ${L.size}px "${S.font}", "Amiri", serif`;
+  const lineH = L.size * L.lh, totalH = lineH * L.lines.length;
+  let maxLW = 0; L.lines.forEach(l => { maxLW = Math.max(maxLW, c.measureText(l).width); });
+  const cy = h * .5 + (1 - fade) * 14, top = cy - totalH / 2;
+  if (S.overlay) {
+    const px = L.size * .7, py = L.size * .45, bw = Math.min(w * .94, maxLW + px * 2), bh = totalH + py * 2;
+    c.fillStyle = `rgba(0,0,0,${S.overlayOp})`; rrect(c, (w - bw) / 2, cy - bh / 2, bw, bh, L.size * .5); c.fill();
+    c.strokeStyle = 'rgba(255,255,255,.16)'; c.lineWidth = Math.max(1, short / 540); c.stroke();
+  } else { c.shadowColor = 'rgba(0,0,0,.85)'; c.shadowBlur = L.size * .25; c.shadowOffsetY = 2; }
+  c.fillStyle = S.color;
+  L.lines.forEach((l, i) => c.fillText(l, w / 2, top + lineH * (i + .5)));
+  c.restore();
+  if (S.showName) {
+    const si = curSurahInfo(); if (si) {
+      c.save(); c.direction = 'rtl'; c.textAlign = 'center'; c.textBaseline = 'middle';
+      const fs = short * .042; c.font = `700 ${fs}px "Amiri", serif`;
+      c.shadowColor = 'rgba(0,0,0,.8)'; c.shadowBlur = fs * .3; c.fillStyle = '#fde68a';
+      c.fillText(si.name, w / 2, h * .075); c.restore();
+    }
+  }
+}
+
+/* ---------------- Main render loop ---------------- */
+let lastT = performance.now(), T0 = lastT;
+function frame(now) {
+  requestAnimationFrame(frame);
+  if (now - lastT < 1000 / targetFps() - 3) return;   // frame cap: 30 fps on phones / while recording at 30
+  const dt = Math.min(.05, (now - lastT) / 1000); lastT = now;
+  const w = canvas.width, h = canvas.height, t = (now - T0) / 1000;
+  drawBackground(ctx, w, h, t, dt);
+  drawVerse(ctx, w, h);
+  updateProgress();
+}
+function updateProgress() {
+  const n = S.range.length;
+  if (!n) return;
+  const d = audio.duration, f = (S.loadedIdx === S.idx && isFinite(d) && d > 0) ? audio.currentTime / d : 0;
+  const p = (S.idx + f) / n;
+  if (document.activeElement !== $('progress') || S.playing) $('progress').value = Math.round(p * 1000);
+  const tl = fmtTime(audio.currentTime) + ' / ' + fmtTime(isFinite(d) ? d : 0);
+  if (tl !== updateProgress.tl) { updateProgress.tl = tl; $('timeLbl').textContent = tl; }
+  if (S.recording) { const rt = fmtTime((performance.now() - recStart) / 1000); if (rt !== updateProgress.rt) { updateProgress.rt = rt; $('recTime').textContent = rt; } }
+}
+
+/* ---------------- UI wiring ---------------- */
+function updateUI() {
+  const n = S.range.length, a = S.range[S.idx];
+  $('verseLbl').textContent = n ? `الآية ${toArabicDigits(a ? a.n : 0)} · (${toArabicDigits(S.idx + 1)} من ${toArabicDigits(n)})` : 'الآية 0 / 0';
+  $('playBtn').innerHTML = S.playing ? '⏸ إيقاف مؤقت' : '▶ تشغيل';
+  $('loopBtn').classList.toggle('on', S.loop);
+}
+function updateExportInfo() {
+  const q = QUALITY[S.quality], [w, h] = getDims(S.aspect, q.short);
+  $('exportInfo').textContent = `الدقة: ${w}×${h} · ${(q.bps / 1e6)} Mbps · ${q.fps} إطار/ث` + (S.quality === '2160' ? ' — قد لا تدعم بعض الأجهزة 4K' : '');
+}
+function bindSwitch(id, key, cb) {
+  const el = $(id);
+  el.addEventListener('click', () => { S[key] = !S[key]; el.setAttribute('aria-checked', S[key]); layoutCache.key = ''; cb && cb(); });
+}
+
+function buildBgGrid() {
+  const g = $('bgGrid'); g.innerHTML = '';
+  SCENES.forEach((sc, i) => {
+    const d = document.createElement('div'); d.className = 'bg-item' + (i === S.bg && !S.custom ? ' sel' : ''); d.dataset.i = i;
+    const cv = document.createElement('canvas'); cv.width = 120; cv.height = 120;
+    try { sc.fn(cv.getContext('2d'), 120, 120, sc.t, 0); } catch (e) {}
+    const sp = document.createElement('span'); sp.textContent = sc.name;
+    d.append(cv, sp);
+    d.onclick = () => { S.bg = i; clearCustom(); markBg(); };
+    g.appendChild(d);
+  });
+}
+function markBg() { document.querySelectorAll('.bg-item').forEach((e, i) => e.classList.toggle('sel', !S.custom && i === S.bg)); }
+function clearCustom() {
+  if (S.custom) { if (S.custom.type === 'video') S.custom.el.pause(); URL.revokeObjectURL(S.custom.url); S.custom = null; }
+  $('bgClear').classList.add('hidden'); markBg();
+}
+$('bgUpload').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  clearCustom();
+  const url = URL.createObjectURL(f);
+  if (f.type.startsWith('video')) {
+    const v = document.createElement('video'); v.src = url; v.muted = true; v.loop = true; v.playsInline = true; v.autoplay = true;
+    v.play().catch(() => {}); S.custom = { type: 'video', el: v, url };
+  } else {
+    const im = new Image(); im.src = url; S.custom = { type: 'image', el: im, url };
+  }
+  $('bgClear').classList.remove('hidden'); markBg(); toast('تم تطبيق الخلفية المخصّصة'); e.target.value = '';
+});
+$('bgClear').onclick = clearCustom;
+
+const SWATCHES = ['#ffffff', '#fde68a', '#fbbf24', '#86efac', '#7dd3fc', '#f9a8d4'];
+function buildSwatches() {
+  const box = $('swatches'); box.innerHTML = '';
+  SWATCHES.forEach(c => {
+    const s = document.createElement('div'); s.className = 'swatch' + (c === S.color ? ' sel' : ''); s.style.background = c;
+    s.onclick = () => setColor(c); box.appendChild(s);
+  });
+}
+function setColor(c) { S.color = c; $('colorInp').value = c; buildSwatches(); }
+
+function init() {
+  const rs = $('reciterSel'); RECITERS.forEach(r => rs.add(new Option(r.name, r.id))); rs.value = S.reciter;
+  $('qualitySel').value = S.quality;
+  rs.onchange = () => { S.reciter = rs.value; const wasPlaying = S.playing, i = S.idx; hardStop(); S.idx = i; if (wasPlaying) play(); updateUI(); };
+  $('surahSel').onchange = e => loadSurah(+e.target.value);
+  $('fromSel').onchange = e => { S.from = +e.target.value; applyRange(); };
+  $('toSel').onchange = e => { S.to = +e.target.value; applyRange(); $('fromSel').value = S.from; };
+  document.querySelectorAll('#aspectBtns .btn').forEach(b => b.onclick = () => { if (S.recording) return; S.aspect = b.dataset.aspect; layoutCache.key = ''; applyAspect(); });
+  $('fontSel').onchange = async e => {
+    S.font = e.target.value; layoutCache.key = '';
+    try { await document.fonts.load(`700 40px "${S.font}"`, 'بسم الله'); } catch (_) {}
+    layoutCache.key = '';
+  };
+  $('colorInp').oninput = e => setColor(e.target.value);
+  $('sizeRange').oninput = e => { S.fontSize = +e.target.value; $('sizeVal').textContent = S.fontSize; layoutCache.key = ''; };
+  $('overlayOp').oninput = e => { S.overlayOp = e.target.value / 100; };
+  bindSwitch('swOverlay', 'overlay'); bindSwitch('swSingle', 'single'); bindSwitch('swNum', 'showNum'); bindSwitch('swName', 'showName');
+  $('qualitySel').onchange = e => { S.quality = e.target.value; updateExportInfo(); };
+  $('formatSel').onchange = e => { S.format = e.target.value; };
+  $('playBtn').onclick = () => (S.playing ? pause() : play());
+  $('restartBtn').onclick = () => { restart(); };
+  $('loopBtn').onclick = () => { S.loop = !S.loop; updateUI(); };
+  $('volume').oninput = e => {
+    const v = e.target.value / 100; if (gainNode) gainNode.gain.value = v; else audio.volume = v;
+    $('volIcon').textContent = v === 0 ? '🔇' : v < .5 ? '🔉' : '🔊';
+  };
+  $('progress').addEventListener('input', e => seekFraction(e.target.value / 1000));
+  $('recBtn').onclick = () => (S.recording ? stopRecording() : startRecording());
+  document.addEventListener('keydown', e => {
+    if (e.code === 'Space' && !/INPUT|SELECT|TEXTAREA|BUTTON/.test(document.activeElement.tagName)) { e.preventDefault(); S.playing ? pause() : play(); }
+  });
+  buildBgGrid(); buildSwatches(); applyAspect(); updateUI(); updateExportInfo();
+  document.fonts.load('700 40px "Amiri"', 'بسم').catch(() => {});
+  loadSurahs();
+  requestAnimationFrame(frame);
+}
+
+/* ---------------- Recording & export ---------------- */
+let rec = null, chunks = [], recStart = 0, wakeLock = null, recMime = '', recCancelled = false;
+function pickMime(fmt) {
+  const lists = {
+    mp4: ['video/mp4;codecs=avc1.640028,mp4a.40.2', 'video/mp4;codecs=avc1.42E01E,mp4a.40.2', 'video/mp4;codecs=avc1,mp4a.40.2', 'video/mp4'],
+    webm: ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm']
+  };
+  const order = fmt === 'mp4' ? ['mp4', 'webm'] : ['webm', 'mp4'];
+  for (const f of order) for (const m of lists[f]) if (window.MediaRecorder && MediaRecorder.isTypeSupported(m)) return { mime: m, fell: f !== fmt };
+  return null;
+}
+async function startRecording() {
+  if (!S.range.length) return toast('اختر سورة ونطاق آيات أولاً');
+  if (!window.MediaRecorder || !canvas.captureStream) return toast('المتصفح لا يدعم التسجيل. استخدم Chrome أو Edge أو Safari حديث.', 6000);
+  const pm = pickMime(S.format); if (!pm) return toast('لا توجد صيغة تسجيل مدعومة في هذا المتصفح.', 6000);
+  await ensureAudio();
+  const q = QUALITY[S.quality], [w, h] = getDims(S.aspect, q.short);
+  if (IS_MOBILE && S.quality !== '720') toast('على الجوال يُنصح بجودة 720p لتجنّب البطء وسخونة الجهاز', 4500);
+  setCanvasSize(w, h); layoutCache.key = ''; verseKey = '';
+  const vStream = canvas.captureStream(q.fps);
+  const stream = new MediaStream([...vStream.getVideoTracks(), ...recDest.stream.getAudioTracks()]);
+  try {
+    rec = new MediaRecorder(stream, { mimeType: pm.mime, videoBitsPerSecond: q.bps, audioBitsPerSecond: 192000 });
+  } catch (e) {
+    setCanvasSize(...getDims(S.aspect, previewShort())); return toast('تعذّر بدء التسجيل بهذه الإعدادات. جرّب جودة أقل.', 6000);
+  }
+  recMime = pm.mime; chunks = []; recCancelled = false;
+  rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+  rec.onstop = finishRecording;
+  if (pm.fell) toast(`المتصفح لا يدعم ${S.format.toUpperCase()} — سيتم الحفظ بصيغة ${pm.mime.includes('mp4') ? 'MP4' : 'WebM'}`, 5000);
+  S.recording = true; S.loop = false;
+  $('settings').classList.add('locked'); $('result').classList.add('hidden');
+  $('recBadge').classList.remove('hidden'); $('recBadge').classList.add('flex');
+  $('recBtn').textContent = '⏹ إيقاف وحفظ'; $('recBtn').classList.add('btn-danger'); $('recBtn').classList.remove('btn-primary');
+  try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (_) {}
+  hardStop(); S.idx = 0; loadVerse(0);
+  recStart = performance.now(); rec.start(1000);
+  setTimeout(() => { S.playing = true; audio.play().then(updateUI).catch(() => cancelRecording('تعذّر تشغيل الصوت')); }, 350);
+}
+function stopRecording() {
+  if (!rec || rec.state === 'inactive') return;
+  audio.pause(); S.playing = false; rec.stop();
+}
+function cancelRecording(reason) {
+  recCancelled = true; toast('أُلغي التسجيل: ' + reason, 5000);
+  if (rec && rec.state !== 'inactive') { audio.pause(); rec.stop(); } else cleanupRecording();
+}
+function cleanupRecording() {
+  S.recording = false; S.playing = false;
+  setCanvasSize(...getDims(S.aspect, previewShort())); layoutCache.key = '';
+  $('settings').classList.remove('locked'); $('recBadge').classList.add('hidden'); $('recBadge').classList.remove('flex');
+  $('recBtn').textContent = '⏺ تسجيل وتصدير الفيديو'; $('recBtn').classList.remove('btn-danger'); $('recBtn').classList.add('btn-primary');
+  if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; }
+  updateUI();
+}
+function finishRecording() {
+  const ok = !recCancelled && chunks.length;
+  const blob = ok ? new Blob(chunks, { type: recMime.split(';')[0] }) : null;
+  cleanupRecording();
+  if (!blob) return;
+  const ext = recMime.includes('mp4') ? 'mp4' : 'webm';
+  const url = URL.createObjectURL(blob), si = curSurahInfo();
+  const name = `nour-al-bayan_${si ? si.englishName.replace(/\W+/g, '-') : 'quran'}_${S.from}-${S.to}_${QUALITY[S.quality].label}.${ext}`;
+  const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  const r = $('result'); r.classList.remove('hidden');
+  r.innerHTML = `<div class="font-semibold text-emerald-300">✔ تم التصدير (${(blob.size / 1048576).toFixed(1)} ميغابايت)</div>
+    <a href="${url}" download="${name}" class="btn btn-primary w-full">⬇ تنزيل الفيديو (${ext.toUpperCase()})</a>
+    <video src="${url}" controls playsinline class="w-full rounded-lg max-h-72 bg-black"></video>`;
+  restoreAfterRecord();
+}
+function restoreAfterRecord() { S.idx = 0; S.loadedIdx = -1; hardStop(); updateUI(); }
+
+/* ---------------- PWA ---------------- */
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; $('installBtn').classList.remove('hidden'); });
+$('installBtn').onclick = async () => {
+  if (!deferredPrompt) return; deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; $('installBtn').classList.add('hidden');
+};
+window.addEventListener('appinstalled', () => { $('installBtn').classList.add('hidden'); toast('تم تثبيت التطبيق بنجاح'); });
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent), standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+if (isIOS && !standalone) setTimeout(() => toast('للتثبيت على آيفون: زر المشاركة ثم «إضافة إلى الشاشة الرئيسية»', 6000), 2500);
+
+init();
+</script>
+</body>
+</html>
